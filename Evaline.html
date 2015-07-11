@@ -20,11 +20,15 @@ body {
 </style>
 <body>
 <div id="option">
-    <input name="updateButton" 
+    <input name="ToggleButton" 
            type="button" 
-           value="Toggle between left and right hipp values" 
-           onclick="updateData()" />
-    <input name="updateButton" 
+           value="Left hippo" 
+           onclick="Left()" />
+    <input name="ToggleButton" 
+           type="button" 
+           value="Right hippo" 
+           onclick="Right()" />
+    <input name="TotalButton" 
            type="button" 
            value="Show total Volume" 
            onclick="showTotal()" />
@@ -52,73 +56,121 @@ var svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+function Refresh() {
+  svg.selectAll("*").remove();
+}
 
-d3.csv("dataALL.csv", function(error, data) {
-  if (error) throw error;
-
-  // Compute the series names ("y1", "y2", etc.) from the loaded CSV.
-  var seriesNames = d3.keys(data[0])
-      .filter(function(d) { return d !== 'Subject'; })
-      // .sort();
-
-  // Map the data to an array of arrays of {x, y} tuples.
-  var series = seriesNames.map(function(series) {
-    return data.map(function(d) {
-      // return {x: d['Subject'] = +d['Subject'], y: +d[series]};
-      return {x: d['Subject'] = +d['Subject'], y: d['normL_volume'] = +d['normL_volume']};
-    });
-  });
-
-
-  // Compute the scales’ domains.
-  // x.domain(d3.extent(d3.merge(series), function(d) { return d.x; })).nice();
-  x.domain([0,series[0].length]);
-  y.domain(d3.extent(d3.merge(series), function(d) { return d.y; })).nice();
-
-  // Add the x-axis.
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.svg.axis().scale(x).orient("bottom"));
-
-  // Add the y-axis.
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(d3.svg.axis().scale(y).orient("left"));
-
-  // Add the points!
-  svg.selectAll(".series")
-      .data(series)
-    .enter().append("g")
-      .attr("class", "series")
-      .style("fill", "gray")
-    .selectAll(".point")
-      .data(function(d) { return d; })
-    .enter().append("circle")
-      .attr("class", "point")
-      .attr("r", 3.5)
-      .attr("cx", function(d) { return x(d.x); })
-      .attr("cy", function(d) { return y(d.y); });
-});
 
   // ** Update data section (Called from the onclick)
-  function updateData() {
+
+  d3.csv("dataALL.csv", function(error, data) {
+    if (error) throw error;
+
+    // Compute the series names ("y1", "y2", etc.) from the loaded CSV.
+    var seriesNames = d3.keys(data[0])
+        .filter(function(d) { return d !== 'Age'; })
+        // .sort();
+
+    // Map the data to an array of arrays of {x, y} tuples.
+    var series = seriesNames.map(function(series) {
+      return data.map(function(d) {
+        // return {x: d['Age'] = +d['Age'], y: +d[series]};
+        return {x: d['Age'] = +d['Age'], y: d['normL_volume'] = +d['normL_volume']};
+      });
+    });
+
+
+    // Compute the scales’ domains.
+    x.domain(d3.extent(d3.merge(series), function(d) { return d.x; })).nice();
+    // x.domain([0,100]);
+    y.domain(d3.extent(d3.merge(series), function(d) { return d.y; })).nice();
+
+    // Add the x-axis.
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.svg.axis().scale(x).orient("bottom"));
+
+    // Add the y-axis.
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(d3.svg.axis().scale(y).orient("left"));
+
+
+        svg.selectAll(".series")
+          .data(series)
+          .enter().append("g")
+          .attr("class", "series")
+          .style("fill", "blue")
+          .selectAll(".point")
+          .data(function(d) { return d; })
+          .enter().append("circle")
+          .attr("class", "point")
+          .attr("r", 3.5)
+          .attr("cx", function(d) { return x(d.x); })
+          .attr("cy", function(d) { return y(d.y); });
+
+});
+
+
+  // ** Update data section (Called from the onclick)
+  function Left() {
 
       // Get the data again
       d3.csv("dataALL.csv", function(error, data) {
         if (error) throw error;
         // Compute the series names ("y1", "y2", etc.) from the loaded CSV.
         var seriesNames = d3.keys(data[0])
-            .filter(function(d) { return d !== 'Subject'; })
+            .filter(function(d) { return d !== 'Age'; })
         // Map the data to an array of arrays of {x, y} tuples.
         var series = seriesNames.map(function(series) {
           return data.map(function(d) {
-            return {x: d['Subject'] = +d['Subject'], y: d['normR_volume'] = +d['normR_volume']};
+            return {x: d['Age'] = +d['Age'], y: d['normL_volume'] = +d['normL_volume']};
           });
         });
 
         // Compute the scales’ domains.
-        x.domain([0,series[0].length]);
+        x.domain(d3.extent(d3.merge(series), function(d) { return d.x; })).nice();
+        y.domain(d3.extent(d3.merge(series), function(d) { return d.y; })).nice();
+
+        // Select the section we want to apply our changes to
+        var svg = d3.select("body").transition();
+      // Make the changes
+          svg.select(".series")   // change the line
+            .duration(750)
+            .style("fill", "yellow")
+            .selectAll(".point")
+            .attr("r", 3.5)
+            .attr("cx", function(d) { return x(d.x); })
+            .attr("cy", function(d) { return y(d.y); });
+
+
+
+      });
+  }
+
+
+
+
+
+  // ** Update data section (Called from the onclick)
+  function Right() {
+
+      // Get the data again
+      d3.csv("dataALL.csv", function(error, data) {
+        if (error) throw error;
+        // Compute the series names ("y1", "y2", etc.) from the loaded CSV.
+        var seriesNames = d3.keys(data[0])
+            .filter(function(d) { return d !== 'Age'; })
+        // Map the data to an array of arrays of {x, y} tuples.
+        var series = seriesNames.map(function(series) {
+          return data.map(function(d) {
+            return {x: d['Age'] = +d['Age'], y: d['normR_volume'] = +d['normR_volume']};
+          });
+        });
+
+        // Compute the scales’ domains.
+        x.domain(d3.extent(d3.merge(series), function(d) { return d.x; })).nice();
         y.domain(d3.extent(d3.merge(series), function(d) { return d.y; })).nice();
 
         // Select the section we want to apply our changes to
@@ -132,15 +184,10 @@ d3.csv("dataALL.csv", function(error, data) {
             .attr("cx", function(d) { return x(d.x); })
             .attr("cy", function(d) { return y(d.y); });
 
-          svg.select(".x") // change the x axis
-              .duration(750)
-              .call(x);
-          svg.select(".y") // change the y axis
-              .duration(750)
-              .call(y);
-
       });
   }
+
+
   // ** Update data section (Called from the onclick)
   function showTotal() {
 
@@ -149,16 +196,18 @@ d3.csv("dataALL.csv", function(error, data) {
         if (error) throw error;
         // Compute the series names ("y1", "y2", etc.) from the loaded CSV.
         var seriesNames = d3.keys(data[0])
-            .filter(function(d) { return d !== 'Subject'; })
+            .filter(function(d) { return d !== 'Age'; })
         // Map the data to an array of arrays of {x, y} tuples.
         var series = seriesNames.map(function(series) {
           return data.map(function(d) {
-            return {x: d['Subject'] = +d['Subject'], y: d['normTot_volume'] = +d['normTot_volume']};
+            return {x: d['Age'] = +d['Age'], y: d['normTot_volume'] = +d['normTot_volume']};
           });
         });
 
+        console.log(series)
+
         // Compute the scales’ domains.
-        x.domain([0,series[0].length]);
+        x.domain(d3.extent(d3.merge(series), function(d) { return d.x; })).nice();
         y.domain(d3.extent(d3.merge(series), function(d) { return d.y; })).nice();
 
         // Select the section we want to apply our changes to
@@ -166,18 +215,21 @@ d3.csv("dataALL.csv", function(error, data) {
       // Make the changes
           svg.select(".series")   // change the line
             .duration(750)
-            .style("fill", "pink")
+            .style("fill", "orange")
             .selectAll(".point")
             .attr("r", 3.5)
             .attr("cx", function(d) { return x(d.x); })
             .attr("cy", function(d) { return y(d.y); });
 
-          svg.select(".x") // change the x axis
-              .duration(750)
-              .call(x);
-          svg.select(".y") // change the y axis
-              .duration(750)
-              .call(y);
+        svg.select(".xaxis") // change the x axis
+            .duration(750)
+            .call(x);
+        svg.select(".yaxis") // change the y axis
+            .duration(750)
+            .call(y);
+
+
+ 
 
       });
   }
