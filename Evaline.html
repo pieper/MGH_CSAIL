@@ -101,21 +101,16 @@ function Refresh() {
           .data(series)
           .enter().append("g")
           .attr("class", "series")
-          .style("fill", "blue")
           .selectAll(".point")
           .data(function(d) { return d; })
           .enter().append("circle")
           .attr("class", "point")
-          .attr("r", 3.5)
-          .attr("cx", function(d) { return x(d.x); })
-          .attr("cy", function(d) { return y(d.y); });
 
 });
 
 
   // ** Update data section (Called from the onclick)
   function Left() {
-
       // Get the data again
       d3.csv("dataALL.csv", function(error, data) {
         if (error) throw error;
@@ -128,7 +123,7 @@ function Refresh() {
             return {x: d['Age'] = +d['Age'], y: d['normL_volume'] = +d['normL_volume']};
           });
         });
-
+        console.log(series[0][0])
         // Compute the scales’ domains.
         x.domain(d3.extent(d3.merge(series), function(d) { return d.x; })).nice();
         y.domain(d3.extent(d3.merge(series), function(d) { return d.y; })).nice();
@@ -138,11 +133,18 @@ function Refresh() {
       // Make the changes
           svg.select(".series")   // change the line
             .duration(750)
-            .style("fill", "yellow")
             .selectAll(".point")
             .attr("r", 3.5)
             .attr("cx", function(d) { return x(d.x); })
             .attr("cy", function(d) { return y(d.y); });
+
+
+                svg.select("x axis") // change the x axis
+            .duration(750)
+            .call(x);
+        svg.select("y axis") // change the y axis
+            .duration(750)
+            .call(y);
 
 
 
@@ -155,7 +157,6 @@ function Refresh() {
 
   // ** Update data section (Called from the onclick)
   function Right() {
-
       // Get the data again
       d3.csv("dataALL.csv", function(error, data) {
         if (error) throw error;
@@ -168,6 +169,9 @@ function Refresh() {
             return {x: d['Age'] = +d['Age'], y: d['normR_volume'] = +d['normR_volume']};
           });
         });
+
+        console.log(series[0][0])
+
 
         // Compute the scales’ domains.
         x.domain(d3.extent(d3.merge(series), function(d) { return d.x; })).nice();
@@ -184,15 +188,24 @@ function Refresh() {
             .attr("cx", function(d) { return x(d.x); })
             .attr("cy", function(d) { return y(d.y); });
 
+
+
+                    svg.select("x axis") // change the x axis
+            .duration(750)
+            .call(x);
+        svg.select("y axis") // change the y axis
+            .duration(750)
+            .call(y);
+
       });
   }
 
 
   // ** Update data section (Called from the onclick)
   function showTotal() {
-
       // Get the data again
       d3.csv("dataALL.csv", function(error, data) {
+
         if (error) throw error;
         // Compute the series names ("y1", "y2", etc.) from the loaded CSV.
         var seriesNames = d3.keys(data[0])
@@ -204,7 +217,7 @@ function Refresh() {
           });
         });
 
-        console.log(series)
+        console.log(series[0][0])
 
         // Compute the scales’ domains.
         x.domain(d3.extent(d3.merge(series), function(d) { return d.x; })).nice();
@@ -221,10 +234,10 @@ function Refresh() {
             .attr("cx", function(d) { return x(d.x); })
             .attr("cy", function(d) { return y(d.y); });
 
-        svg.select(".xaxis") // change the x axis
+        svg.select("x axis") // change the x axis
             .duration(750)
             .call(x);
-        svg.select(".yaxis") // change the y axis
+        svg.select("y axis") // change the y axis
             .duration(750)
             .call(y);
 
