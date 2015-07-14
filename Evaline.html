@@ -1,21 +1,19 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<style>
+<style type="text/css"> 
 
 body {
-  font: 9px sans-serif;
+  font: 11px sans-serif;
+  background-color: #636363;
 }
 
 .axis path,
 .axis line {
   fill: none;
-  stroke: gray;
+  stroke: black;
   shape-rendering: crispEdges;
 }
 
-/*.point {
-  stroke: #000;
-}*/
 
 </style>
 <body>
@@ -23,19 +21,24 @@ body {
 <div id="option">
     <input name="ToggleButton" 
            type="button" 
-           value="Left hippo" 
+           value="Left hippocampal volume (Norm)" 
            onclick="Left()" />
     <input name="ToggleButton" 
            type="button" 
-           value="Right hippo" 
+           value="Right hippocampal volume (Norm)" 
            onclick="Right()" />
     <input name="ToggleButton" 
            type="button" 
-           value="Show total Volume" 
+           value="Total hippocampal volume (Norm)" 
            onclick="showTotal()" />
+    <input name="ToggleButton" 
+           type="button" 
+           value="Reset" 
+           onclick="Reset()" />
 
 </div>
-<div>
+<br>
+<!-- <div>
       <input name="ToggleButton" 
            type="button" 
            value="Regression ON" 
@@ -44,11 +47,11 @@ body {
            type="button" 
            value="Regression OFF" 
            onclick="RegrOFF()" />
-</div>
+</div> -->
 <script>
 
 
-var margin = {top: 20, right: 20, bottom: 30, left: 40},
+var margin = {top: 30, right: 20, bottom: 30, left: 100},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
@@ -71,18 +74,6 @@ var svg = d3.select("body").append("svg")
 
   d3.csv("dataALL.csv", function(error, data) {
 
-
-    //     // Cleans up null entries
-    // Array.prototype.clean = function(deleteValue) {
-    //   for (var i = 0; i < this.length; i++) {
-    //     if (this[i] == deleteValue) {         
-    //       this.splice(i, 1);
-    //       i--;
-    //     }
-    //   }
-    //   return this;
-    // };
-
     if (error) throw error;
 
     data.forEach(function(d) {
@@ -100,22 +91,35 @@ var svg = d3.select("body").append("svg")
     svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.svg.axis().scale(x).orient("bottom"));
+        .call(d3.svg.axis().scale(x).orient("bottom"))
+        .style("fill", "black");
 
     // Add the y-axis.
     svg.append("g")
         .attr("class", "y axis")
-        .call(d3.svg.axis().scale(y).orient("left"));
+        .call(d3.svg.axis().scale(y).orient("left"))
+        .style("fill", "black");;
 
 
     svg.selectAll(".dot")
         .data(data)
         .enter().append("circle")
-        // .attr("class", "Left")
-        // .attr("r", 4.5)
-        // .attr("cx", function(d) { return x(d.Age); })
-        // .attr("cy", function(d) { return y(d.normTot_volume) ; })
-        // .style("fill",  "gray");
+        .attr("class", "Left")
+        .attr("r", 3.5)
+        .attr("cx", function(d) { return x(d.Age); })
+        .attr("cy", function(d) { return y(d.normL_volume) ; })
+        .style("fill", d3.rgb(215,183,219));
+
+
+
+    svg.selectAll(".dot")
+        .data(data)
+        .enter().append("circle")
+        .attr("class", "Right")
+        .attr("r", 3.5)
+        .attr("cx", function(d) { return x(d.Age); })
+        .attr("cy", function(d) { return y(d.normR_volume) ; })
+        .style("fill", d3.rgb(168,222,139));
 
 
 });
@@ -143,18 +147,18 @@ var svg = d3.select("body").append("svg")
     svg.selectAll("circle")
         .attr("class", "Left")
         .duration(750)
-        .attr("r", 4.5)
+        .attr("r", 3.5)
         .attr("cx", function(d) { return x(d.Age); })
         .attr("cy", function(d) { return y(d.normL_volume) ; })
         .style("fill", d3.rgb(215,183,219));
 
 
-        svg.select("x axis") // change the x axis
-        .duration(750)
-        .call(x);
-        svg.select("y axis") // change the y axis
-        .duration(750)
-        .call(y);
+        // svg.select("x axis") // change the x axis
+        // .duration(750)
+        // .call(x);
+        // svg.select("y axis") // change the y axis
+        // .duration(750)
+        // .call(y);
 
 
 
@@ -183,18 +187,18 @@ var svg = d3.select("body").append("svg")
     svg.selectAll("circle")
         .duration(750)
         .attr("class", "Right")
-        .attr("r", 4.5)
+        .attr("r", 3.5)
         .attr("cx", function(d) { return x(d.Age); })
         .attr("cy", function(d) { return y(d.normR_volume) ; })
         .style("fill", d3.rgb(168,222,139));
 
 
-        svg.select("x axis") // change the x axis
-        .duration(750)
-        .call(x);
-        svg.select("y axis") // change the y axis
-        .duration(750)
-        .call(y);
+        // svg.select("x axis") // change the x axis
+        // .duration(750)
+        // .call(x);
+        // svg.select("y axis") // change the y axis
+        // .duration(750)
+        // .call(y);
 
       });
   }
@@ -220,20 +224,71 @@ var svg = d3.select("body").append("svg")
     svg.selectAll("circle")
         .duration(750)
         .attr("class", "Total")
-        .attr("r", 4.5)
+        .attr("r", 3.5)
         .attr("cx", function(d) { return x(d.Age); })
         .attr("cy", function(d) { return y(d.normTot_volume) ; })
         .style("fill", d3.rgb(241,164,138));
 
-        svg.select("x axis") // change the x axis
-        .duration(750)
-        .call(x);
-        svg.select("y axis") // change the y axis
-        .duration(750)
-        .call(y);
+        // svg.select("x axis") // change the x axis
+        // .duration(750)
+        // .call(x);
+        // svg.select("y axis") // change the y axis
+        // .duration(750)
+        // .call(y);
 
       });
   }
+
+  function Reset() {
+    
+    d3.csv("dataALL.csv", function(error, data) {
+
+    if (error) throw error;
+
+    data.forEach(function(d) {
+
+        d.Age = +d.Age;
+        d.normL_volume = +d.normL_volume;
+        d.normR_volume = +d.normR_volume;
+        d.normTot_volume = +d.normTot_volume;
+      });
+      x.domain(d3.extent(data, function(d) { return  d.Age; })).nice();
+      y.domain(d3.extent(data, function(d) { return d.normTot_volume; })).nice();
+
+
+      // // Add the x-axis.
+      // svg.append("g")
+      //     .attr("class", "x axis")
+      //     .attr("transform", "translate(0," + height + ")")
+      //     .call(d3.svg.axis().scale(x).orient("bottom"))
+      //     .style("fill", "black");
+
+      // // Add the y-axis.
+      // svg.append("g")
+      //     .attr("class", "y axis")
+      //     .call(d3.svg.axis().scale(y).orient("left"))
+      //     .style("fill", "black");;
+
+    d3.select("Left").remove();
+    var svg = d3.select("body").transition();
+
+    svg.selectAll("circle")
+        .attr("class", "Left")
+        .duration(750)
+        .attr("r", 3.5)
+        .attr("cx", function(d) { return x(d.Age); })
+        .attr("cy", function(d) { return y(d.normL_volume) ; })
+        .style("fill", d3.rgb(215,183,219));
+
+    svg.selectAll("circle")
+        .duration(750)
+        .attr("class", "Right")
+        .attr("r", 3.5)
+        .attr("cx", function(d) { return x(d.Age); })
+        .attr("cy", function(d) { return y(d.normR_volume) ; })
+        .style("fill", d3.rgb(168,222,139));
+  });
+}
 
 </script>
 </body>
