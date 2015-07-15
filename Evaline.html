@@ -4,13 +4,13 @@
 
 body {
   font: 11px sans-serif;
-  background-color: #636363;
+  background-color: #424242;
 }
 
 .axis path,
 .axis line {
   fill: none;
-  stroke: black;
+  stroke: white;
   shape-rendering: crispEdges;
 }
 
@@ -92,13 +92,13 @@ var svg = d3.select("body").append("svg")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.svg.axis().scale(x).orient("bottom"))
-        .style("fill", "black");
+        .style("fill", "white");
 
     // Add the y-axis.
     svg.append("g")
         .attr("class", "y axis")
         .call(d3.svg.axis().scale(y).orient("left"))
-        .style("fill", "black");;
+        .style("fill", "white");;
 
 
     svg.selectAll(".dot")
@@ -192,14 +192,6 @@ var svg = d3.select("body").append("svg")
         .attr("cy", function(d) { return y(d.normR_volume) ; })
         .style("fill", d3.rgb(116,224,184));
 
-
-        // svg.select("x axis") // change the x axis
-        // .duration(750)
-        // .call(x);
-        // svg.select("y axis") // change the y axis
-        // .duration(750)
-        // .call(y);
-
       });
   }
 
@@ -229,12 +221,6 @@ var svg = d3.select("body").append("svg")
         .attr("cy", function(d) { return y(d.normTot_volume) ; })
         .style("fill", d3.rgb(241,164,138));
 
-        // svg.select("x axis") // change the x axis
-        // .duration(750)
-        // .call(x);
-        // svg.select("y axis") // change the y axis
-        // .duration(750)
-        // .call(y);
 
       });
   }
@@ -272,25 +258,21 @@ var svg = d3.select("body").append("svg")
     var svg = d3.select("body").transition();
 
     svg.selectAll("circle")
-        .attr("class", function(d) {
-          if ("Left") {  
-            console.log("left")
-            svg.selectAll("circle")  
             .duration(750)  
+            .attr("class", "Left")
             .attr("r", 3.5)
             .attr("cx", function(d) { return x(d.Age); })
             .attr("cy", function(d) { return y(d.normL_volume) ; })
             .style("fill", d3.rgb(215,183,219));
-          }
-        else if ("Right") {
-            svg.selectAll("circle")  
-                        console.log("right")
+    
+    svg.selectAll("circle")
             .duration(750)  
+            .attr("class", "Right")
             .attr("r", 3.5)
             .attr("cx", function(d) { return x(d.Age); })
             .attr("cy", function(d) { return y(d.normR_volume) ; })
             .style("fill", d3.rgb(116,224,184));
-          }})
+
           
 
 
