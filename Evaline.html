@@ -1,301 +1,79 @@
-<!DOCTYPE html>
-<meta charset="utf-8">
-<style type="text/css"> 
+<html>
+<div id="chartContainer">
+  <script src="http://d3js.org/d3.v3.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.1.6.min.js"></script>
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+      d3.csv("dataALL.csv", function (data) {
+        // // Latest period only
+        // dimple.filterData(data, "VolumeType", "Left");
+        // Create the chart
+        var myChart = new dimple.chart(svg, data);
+        myChart.setBounds(60, 30, 420, 330)
 
-body {
-  font: 11px sans-serif;
-  background-color: #636363;
-}
+        // Create a standard bubble of SKUs by Price and Sales Value
+        // We are coloring by Owner as that will be the key in the legend
+        myChart.addMeasureAxis("x", "Age");
+        myChart.addMeasureAxis("y", "normL_volume");
+        myChart.addSeries(["Subject", "normTot_volume", "normR_volume","VolumeType"], dimple.plot.bubble);
+        var myLegend = myChart.addLegend(530, 100, 60, 300, "Right");
+        myChart.draw();
+        
+        // This is a critical step.  By doing this we orphan the legend. This
+        // means it will not respond to graph updates.  Without this the legend
+        // will redraw when the chart refreshes removing the unchecked item and
+        // also dropping the events we define below.
+        myChart.legends = [];
 
-.axis path,
-.axis line {
-  fill: none;
-  stroke: black;
-  shape-rendering: crispEdges;
-}
+        // This block simply adds the legend title. I put it into a d3 data
+        // object to split it onto 2 lines.  This technique works with any
+        // number of lines, it isn't dimple specific.
+        svg.selectAll("title_text")
+          .data(["Click legend to","show/hide volumes"])
+          .enter()
+          .append("text")
+            .attr("x", 499)
+            .attr("y", function (d, i) { return 80 + i * 12; })
+            .style("font-family", "sans-serif")
+            .style("font-size", "10px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
 
-
-</style>
-<body>
-<script src="http://d3js.org/d3.v3.js"></script>
-<div id="option">
-    <input name="ToggleButton" 
-           type="button" 
-           value="Left hippocampal volume (Norm)" 
-           onclick="Left()" />
-    <input name="ToggleButton" 
-           type="button" 
-           value="Right hippocampal volume (Norm)" 
-           onclick="Right()" />
-    <input name="ToggleButton" 
-           type="button" 
-           value="Total hippocampal volume (Norm)" 
-           onclick="showTotal()" />
-    <input name="ToggleButton" 
-           type="button" 
-           value="Reset" 
-           onclick="Reset()" />
-
+        // Get a unique list of Owner values to use when filtering
+        var filterValues = dimple.getUniqueValues(data, "VolumeType");
+        // Get all the rectangles from our now orphaned legend
+        myLegend.shapes.selectAll("rect")
+          // Add a click event to each rectangle
+          .on("click", function (e) {
+            // This indicates whether the item is already visible or not
+            var hide = false;
+            var newFilters = [];
+            // If the filters contain the clicked shape hide it
+            filterValues.forEach(function (f) {
+              if (f === e.aggField.slice(-1)[0]) {
+                hide = true;
+              } else {
+                newFilters.push(f);
+              }
+            });
+            // Hide the shape or show it
+            if (hide) {
+              d3.select(this).style("opacity", 0.2);
+            } else {
+              newFilters.push(e.aggField.slice(-1)[0]);
+              d3.select(this).style("opacity", 0.8);
+            }
+            // Update the filters
+            filterValues = newFilters;
+            // Filter the data
+            myChart.data = dimple.filterData(data, "VolumeType", filterValues);
+            // Passing a duration parameter makes the chart animate. Without
+            // it there is no transition
+            myChart.draw(800);
+          });
+      });
+  </script>
 </div>
-<br>
-<!-- <div>
-      <input name="ToggleButton" 
-           type="button" 
-           value="Regression ON" 
-           onclick="RegrON()" />
-      <input name="ToggleButton" 
-           type="button" 
-           value="Regression OFF" 
-           onclick="RegrOFF()" />
-</div> -->
-<script>
+</html>
 
 
-var margin = {top: 30, right: 20, bottom: 30, left: 100},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
-
-var x = d3.scale.linear()
-    .range([0, width]);
-
-var y = d3.scale.linear()
-    .range([height, 0]);
-
-var color = d3.scale.category10();
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-  // ** Update data section (Called from the onclick)
-
-  d3.csv("dataALL.csv", function(error, data) {
-
-    if (error) throw error;
-
-    data.forEach(function(d) {
-
-      d.Age = +d.Age;
-      d.normL_volume = +d.normL_volume;
-      d.normR_volume = +d.normR_volume;
-      d.normTot_volume = +d.normTot_volume;
-    });
-    x.domain(d3.extent(data, function(d) { return  d.Age; })).nice();
-    y.domain(d3.extent(data, function(d) { return d.normTot_volume; })).nice();
-
-
-    // Add the x-axis.
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.svg.axis().scale(x).orient("bottom"))
-        .style("fill", "black");
-
-    // Add the y-axis.
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(d3.svg.axis().scale(y).orient("left"))
-        .style("fill", "black");;
-
-
-    svg.selectAll(".dot")
-        .data(data)
-        .enter().append("circle")
-        .attr("class", "Left")
-        .attr("r", 3.5)
-        .attr("cx", function(d) { return x(d.Age); })
-        .attr("cy", function(d) { return y(d.normL_volume) ; })
-        .style("fill", d3.rgb(215,183,219));
-
-
-
-    svg.selectAll(".dot")
-        .data(data)
-        .enter().append("circle")
-        .attr("class", "Right")
-        .attr("r", 3.5)
-        .attr("cx", function(d) { return x(d.Age); })
-        .attr("cy", function(d) { return y(d.normR_volume) ; })
-        .style("fill", d3.rgb(116,224,184));
-
-
-});
-
-
-  // ** Update data section (Called from the onclick)
-  function Left() {
-      // Get the data again
-      d3.csv("dataALL.csv", function(error, data) {
-        if (error) throw error;
-     data.forEach(function(d) {
-
-      d.Age = +d.Age;
-      d.normL_volume = +d.normL_volume;
-      d.normR_volume = +d.normR_volume;
-      d.normTot_volume = +d.normTot_volume;
-    });
-    x.domain(d3.extent(data, function(d) { return  d.Age; })).nice();
-    y.domain(d3.extent(data, function(d) { return d.normTot_volume; })).nice();
-
-
-        // Select the section we want to apply our changes to
-        var svg = d3.select("body").transition();
-      // Make the changes
-    svg.selectAll("circle")
-        .attr("class", "Left")
-        .duration(750)
-        .attr("r", 3.5)
-        .attr("cx", function(d) { return x(d.Age); })
-        .attr("cy", function(d) { return y(d.normL_volume) ; })
-        .style("fill", d3.rgb(215,183,219));
-
-
-        // svg.select("x axis") // change the x axis
-        // .duration(750)
-        // .call(x);
-        // svg.select("y axis") // change the y axis
-        // .duration(750)
-        // .call(y);
-
-
-
-      });
-  }
-
-
-
-  // ** Update data section (Called from the onclick)
-  function Right() {
-      // Get the data again
-      d3.csv("dataALL.csv", function(error, data) {
-        if (error) throw error;
-        data.forEach(function(d) {
-
-          d.Age = +d.Age;
-          d.normL_volume = +d.normL_volume;
-          d.normR_volume = +d.normR_volume;
-          d.normTot_volume = +d.normTot_volume;
-        });
-    x.domain(d3.extent(data, function(d) { return  d.Age; })).nice();
-    y.domain(d3.extent(data, function(d) { return d.normTot_volume; })).nice();
-
-        // Select the section we want to apply our changes to
-    var svg = d3.select("body").transition();
-    svg.selectAll("circle")
-        .duration(750)
-        .attr("class", "Right")
-        .attr("r", 3.5)
-        .attr("cx", function(d) { return x(d.Age); })
-        .attr("cy", function(d) { return y(d.normR_volume) ; })
-        .style("fill", d3.rgb(116,224,184));
-
-
-        // svg.select("x axis") // change the x axis
-        // .duration(750)
-        // .call(x);
-        // svg.select("y axis") // change the y axis
-        // .duration(750)
-        // .call(y);
-
-      });
-  }
-
-
-  // ** Update data section (Called from the onclick)
-  function showTotal() {
-      // Get the data again
-      d3.csv("dataALL.csv", function(error, data) {
-
-        if (error) throw error;
-    data.forEach(function(d) {
-
-      d.Age = +d.Age;
-      d.normL_volume = +d.normL_volume;
-      d.normR_volume = +d.normR_volume;
-      d.normTot_volume = +d.normTot_volume;
-    });
-    x.domain(d3.extent(data, function(d) { return  d.Age; })).nice();
-    y.domain(d3.extent(data, function(d) { return d.normTot_volume; })).nice();
-
-    var svg = d3.select("body").transition();
-    svg.selectAll("circle")
-        .duration(750)
-        .attr("class", "Total")
-        .attr("r", 3.5)
-        .attr("cx", function(d) { return x(d.Age); })
-        .attr("cy", function(d) { return y(d.normTot_volume) ; })
-        .style("fill", d3.rgb(241,164,138));
-
-        // svg.select("x axis") // change the x axis
-        // .duration(750)
-        // .call(x);
-        // svg.select("y axis") // change the y axis
-        // .duration(750)
-        // .call(y);
-
-      });
-  }
-
-  function Reset() {
-    
-    d3.csv("dataALL.csv", function(error, data) {
-
-    if (error) throw error;
-
-    data.forEach(function(d) {
-
-        d.Age = +d.Age;
-        d.normL_volume = +d.normL_volume;
-        d.normR_volume = +d.normR_volume;
-        d.normTot_volume = +d.normTot_volume;
-      });
-      x.domain(d3.extent(data, function(d) { return  d.Age; })).nice();
-      y.domain(d3.extent(data, function(d) { return d.normTot_volume; })).nice();
-
-
-      // // Add the x-axis.
-      // svg.append("g")
-      //     .attr("class", "x axis")
-      //     .attr("transform", "translate(0," + height + ")")
-      //     .call(d3.svg.axis().scale(x).orient("bottom"))
-      //     .style("fill", "black");
-
-      // // Add the y-axis.
-      // svg.append("g")
-      //     .attr("class", "y axis")
-      //     .call(d3.svg.axis().scale(y).orient("left"))
-      //     .style("fill", "black");;
-
-    var svg = d3.select("body").transition();
-
-    svg.selectAll("circle")
-        .attr("class", function(d) {
-          if ("Left") {  
-            console.log("left")
-            svg.selectAll("circle")  
-            .duration(750)  
-            .attr("r", 3.5)
-            .attr("cx", function(d) { return x(d.Age); })
-            .attr("cy", function(d) { return y(d.normL_volume) ; })
-            .style("fill", d3.rgb(215,183,219));
-          }
-        else if ("Right") {
-            svg.selectAll("circle")  
-                        console.log("right")
-            .duration(750)  
-            .attr("r", 3.5)
-            .attr("cx", function(d) { return x(d.Age); })
-            .attr("cy", function(d) { return y(d.normR_volume) ; })
-            .style("fill", d3.rgb(116,224,184));
-          }})
-          
-
-
-  });
-}
-
-</script>
-</body>
