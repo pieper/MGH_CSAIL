@@ -1,0 +1,33 @@
+<html>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="parallel-coordinates/d3.parcoords.js"></script>
+<link rel="stylesheet" type="text/css" href="parallel-coordinates/d3.parcoords.css">
+<div id="example-progressive" class="parcoords" style="width:3200px;height:500px"></div>
+
+<script>
+// load csv file and create the chart
+d3.csv('baby.csv', function(data) {
+// linear color scale
+var blue_to_brown = d3.scale.linear()
+  .domain([9, 50])
+  .range(["steelblue", "brown"])
+  .interpolate(d3.interpolateLab);
+  
+  var parcoords = d3.parcoords()("#example-progressive")
+    .data(data)
+    .hideAxis(["0008103E"])
+    .color(function(d) { return blue_to_brown(d['CSScanningSequence']); })  // quantitative color scale
+    .alpha(0.05)
+    .composite("darken")
+    .margin({ top: 24, left: 150, bottom: 12, right: 0 })
+    .mode("queue")
+    .render()
+    .brushMode("1D-axes");  // enable brushing
+
+
+  parcoords.svg.selectAll("text")
+    .style("font", "10px Lato");
+});
+
+</script>
+</html>
