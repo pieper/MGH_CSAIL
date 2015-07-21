@@ -4,7 +4,7 @@
   <script src="http://dimplejs.org/dist/dimple.v2.1.6.min.js"></script>
   <script type="text/javascript">
     var svg = dimple.newSvg("#chartContainer", 590, 400);
-      d3.csv("dataALL.csv", function (data) {
+      d3.csv("analysis_hip_age_sample.csv", function (data) {
         // // Latest period only
         // dimple.filterData(data, "VolumeType", "Left");
         // Create the chart
@@ -14,8 +14,8 @@
         // Create a standard bubble of SKUs by Price and Sales Value
         // We are coloring by Owner as that will be the key in the legend
         myChart.addMeasureAxis("x", "Age");
-        myChart.addMeasureAxis("y", "normL_volume");
-        myChart.addSeries(["Subject", "normTot_volume", "normR_volume","VolumeType"], dimple.plot.bubble);
+        myChart.addMeasureAxis("y", "Volume");
+        myChart.addSeries(["Subject", "VolumeType", "VolumeType"], dimple.plot.bubble);
         var myLegend = myChart.addLegend(530, 100, 60, 300, "Right");
         myChart.draw();
         

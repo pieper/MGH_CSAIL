@@ -1,25 +1,57 @@
 <html>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="parallel-coordinates/d3.parcoords.js"></script>
+<script src="d3.svg.multibrush/d3.svg.multibrush.js"></script>
 <link rel="stylesheet" type="text/css" href="parallel-coordinates/d3.parcoords.css">
-<div id="example-progressive" class="parcoords" style="width:3200px;height:500px"></div>
+<div id="example" class="parcoords" style="width:1300px;height:500px"></div>
 
 <script>
+
+function sortObject(obj) {
+    var arr = [];
+    for (var prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+            arr.push({
+                'key': prop,
+                'value': obj[prop]
+            });
+        }
+    }
+    arr.sort(function(a, b) { return a.value - b.value; });
+    //arr.sort(function(a, b) { a.value.toLowerCase().localeCompare(b.value.toLowerCase()); }); //use this to sort as strings
+    return arr; // returns array
+}
+
 // load csv file and create the chart
-d3.csv('baby.csv', function(data) {
+d3.csv('baby_sample.csv', function(data) {
+// var arr = sortObject(data);
+// console.log(arr);
 // linear color scale
-var blue_to_brown = d3.scale.linear()
-  .domain([9, 50])
-  .range(["steelblue", "brown"])
-  .interpolate(d3.interpolateLab);
-  
-  var parcoords = d3.parcoords()("#example-progressive")
+  var colorgen = d3.scale.ordinal()
+    .range(["#a6cee3","#1f78b4","#b2df8a","#33a02c",
+            "#fb9a99","#e31a1c","#fdbf6f","#ff7f00",
+            "#cab2d6","#6a3d9a","#ffff99","#b15928"]);
+
+  var color = function(d) { return colorgen(d['ScanningSequence']) };
+
+  var parcoords = d3.parcoords()("#example")
     .data(data)
-    .hideAxis(["0008103E"])
-    .color(function(d) { return blue_to_brown(d['CSScanningSequence']); })  // quantitative color scale
-    .alpha(0.05)
+    .hideAxis(["SeriesDescription"])
+    .hideAxis(["SequenceVariant"])
+    .hideAxis(["SequenceVariant"])
+    .hideAxis(["AngioFlag"])
+    .hideAxis(["PercentPhaseFieldofView"])
+    .hideAxis(["PhaseEncodingDirection"])
+    .hideAxis(["SAR"])
+    .hideAxis(["ReconstructionDiameter"])
+    .hideAxis(["ScanOptions"])
+    .hideAxis(["SHStationName"])
+    .hideAxis(["SamplesperPixel"])
+    .hideAxis(["VariableFlipAngleFlag"])
+    .color(color)
+    .alpha(0.10)
     .composite("darken")
-    .margin({ top: 24, left: 150, bottom: 12, right: 0 })
+    .margin({ top: 25, left: 25, bottom: 12, right: 0 })
     .mode("queue")
     .render()
     .brushMode("1D-axes");  // enable brushing
