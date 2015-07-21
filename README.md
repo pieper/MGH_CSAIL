@@ -10,8 +10,8 @@ git clone https://github.com/syntagmatic/parallel-coordinates.git
 and "d3.svg.multibrush":      
 git clone https://github.com/humanitiesplusdesign/d3.svg.multibrush.git
 
-Then run a simple server: 
-https://github.com/Kallirroi/bigdawgVIZ.git
+Then run a simple server in the same folder: 
+python -m SimpleHTTPServer
 
 and point your browser to: 
 http://localhost:8000/parallel.html
