@@ -1,6 +1,3 @@
-# bigdawgVIZ
-d3.js tools for visualizing medical data
-
 Clone this repo in a folder:
 git clone https://github.com/Kallirroi/bigdawgVIZ.git
 
