@@ -49,11 +49,12 @@ d3.csv('baby_sample.csv', function(data) {
     .hideAxis(["SamplesperPixel"])
     .hideAxis(["VariableFlipAngleFlag"])
     .color(color)
-    .alpha(0.10)
+    .alpha(0.05)
     .composite("darken")
     .margin({ top: 25, left: 25, bottom: 12, right: 0 })
     .mode("queue")
     .render()
+    .reorderable()
     .brushMode("1D-axes");  // enable brushing
 
 
